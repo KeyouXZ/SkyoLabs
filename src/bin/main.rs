@@ -9,8 +9,8 @@
 
 use esp_hal::clock::CpuClock;
 use esp_hal::main;
-use log::error;
-use schoolesp::se;
+use log::{error, info};
+use schoolesp::{se, web};
 
 #[panic_handler]
 fn panic(panic_info: &core::panic::PanicInfo) -> ! {
@@ -36,6 +36,25 @@ fn main() -> ! {
 
     esp_alloc::heap_allocator!(#[esp_hal::ram(reclaimed)] size: 98768);
 
+    // Start TIMER
+    info!("Starting timer....");
+    web::wifi::start_timer(peripherals.TIMG0, peripherals.FROM_CPU_INTR0);
+
+    // Connect to WIfi
+    info!("Starting Wi-Fi...");
+    let _w_ctrl = web::wifi::connect_wifi(peripherals.WIFI);
+
+    info!("Starting core 1...");
+    web::exec::start_second_core(peripherals.CPU_CTRL, peripherals.FROM_CPU_INTR1);
+
+    #[cfg(feature = "dummy")]
+    loop {
+        log::info!("Dummy listening!");
+        let delay_start = esp_hal::time::Instant::now();
+        while delay_start.elapsed() < esp_hal::time::Duration::from_millis(500) {}
+    }
+
+    #[cfg(not(feature = "dummy"))]
     // Define pins
     let pins = se::core::Pins {
         // MQ-7 Pin 4
@@ -55,5 +74,6 @@ fn main() -> ! {
         buzzer: peripherals.GPIO15.into(),
     };
 
+    #[cfg(not(feature = "dummy"))]
     se::main::start(pins);
 }

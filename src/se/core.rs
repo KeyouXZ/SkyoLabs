@@ -1,9 +1,12 @@
 use crate::driver::ssd1306::Ssd1306Size;
+use embassy_net::StackResources;
 use esp_hal::{
     analog::adc::{AdcChannel, RegisterAccess},
     gpio::{AnalogPin, AnyPin},
     i2c::master::Instance,
+    system::Stack,
 };
+use static_cell::{ConstStaticCell, StaticCell};
 
 /// SSD1306 Resolution
 pub const SSD1306_SCREEN_SIZE: Ssd1306Size = Ssd1306Size::S128x64;
@@ -91,3 +94,10 @@ pub const CO_THRESHOLD: Threshold = Threshold {
 //     warning: (51.0, 100.0),
 //     danger: (101.0, f32::INFINITY),
 // };
+
+pub const SSID: &str = "SkyoLabs";
+
+pub static CORE1_STACK: ConstStaticCell<Stack<8192>> = ConstStaticCell::new(Stack::new());
+pub static CORE1_EXECUTOR: static_cell::StaticCell<esp_rtos::embassy::Executor> =
+    static_cell::StaticCell::new();
+pub static NET_RESOURCES: StaticCell<StackResources<3>> = StaticCell::new();
