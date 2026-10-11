@@ -21,12 +21,10 @@ pub fn connect_wifi<'a>(wifi: esp_hal::peripherals::WIFI<'a>) -> WifiController<
     let ap_config = AccessPointConfig::default().with_ssid(ssid);
     let w_config = ControllerConfig::default().with_initial_config(AccessPoint(ap_config));
 
-    let w_ctrl = match WifiController::new(wifi, w_config) {
+    match WifiController::new(wifi, w_config) {
         Ok(x) => x,
         Err(e) => {
             panic!("{:?}", e);
         }
-    };
-
-    w_ctrl
+    }
 }

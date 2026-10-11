@@ -6,6 +6,7 @@ use esp_hal::{
     i2c::master::Instance,
     system::Stack,
 };
+use serde::Serialize;
 use static_cell::{ConstStaticCell, StaticCell};
 
 /// SSD1306 Resolution
@@ -43,7 +44,7 @@ pub struct Threshold {
     pub danger: (f32, f32),
 }
 
-#[derive(PartialEq, Eq, PartialOrd, Ord, Copy, Clone, Debug)]
+#[derive(PartialEq, Eq, PartialOrd, Ord, Copy, Clone, Debug, Serialize)]
 pub enum Level {
     Safe,
     Warning,

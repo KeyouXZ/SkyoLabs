@@ -4,7 +4,9 @@ use crate::{
         self,
         controller::BuzzerController,
         core::{CO_THRESHOLD, HUMIDITY_THRESHOLD, TEMPERATURE_THRESHOLD},
-        display, utils,
+        display,
+        shared::{SensorData, update_sensors},
+        utils,
     },
 };
 use core::{
@@ -70,6 +72,7 @@ where
             Ok(x) => x,
             Err(e) => {
                 log::error!("{}", e);
+                // TODO: Switch to None type
                 (50.0, 50.0)
             }
         };
@@ -78,6 +81,16 @@ where
         let hum_level = HUMIDITY_THRESHOLD.classify(dht_hum);
         let gas_level = CO_THRESHOLD.classify(mq7_val);
         let level = temp_level.max(hum_level).max(gas_level);
+
+        update_sensors(SensorData {
+            mq7: Some(mq7_val),
+            temperature_c: Some(dht_temp),
+            humidity_pct: Some(dht_hum),
+            temp_level: Some(temp_level),
+            hum_level: Some(hum_level),
+            gas_level: Some(gas_level),
+            level: Some(level),
+        });
 
         log::info!(
             "temp: {:.2} hum: {:.2} gas: {:.2} level: {:?}",

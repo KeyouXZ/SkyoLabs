@@ -109,7 +109,7 @@ pub fn display_info<'a>(
     let text = "By Kelompok 2 XII-4";
     let width = text.len() as i32 * 5;
     let x = (se::core::SSD1306_SCREEN_SIZE.width() as i32 - width) / 2;
-    Text::new(text, Point::new(x as i32, 60), text_style).draw(display);
+    Text::new(text, Point::new(x, 60), text_style).draw(display);
 
     let _ = display.flush();
 }
