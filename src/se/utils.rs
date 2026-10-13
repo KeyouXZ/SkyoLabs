@@ -6,7 +6,7 @@ use core::default::Default;
 use esp_hal::{
     gpio::{AnyPin, Flex},
     i2c::master::{Config, I2c, Instance},
-    time::Rate,
+    time::{Duration, Instant, Rate},
 };
 
 pub fn setup_dht22<'a>(pin: AnyPin<'a>) -> Dht22<'a> {
@@ -33,4 +33,27 @@ where
     display.init()?;
 
     Ok(display)
+}
+
+pub fn set_delay(ms: u64) {
+    let delay_start = Instant::now();
+    while delay_start.elapsed() < Duration::from_millis(ms) {}
+}
+
+pub fn co_ppm(rs: f32, r0: f32) -> Option<f32> {
+    if !rs.is_finite() || !r0.is_finite() || rs <= 0.0 || r0 <= 0.0 {
+        return None;
+    }
+
+    let ratio = rs / r0;
+
+    // Approximate MQ-7 sensitivity curve.
+    // Must be validated against your particular sensor.
+    let ppm = 99.042 * libm::powf(ratio, -1.518);
+
+    if ppm.is_finite() && ppm > 0.0 {
+        Some(ppm)
+    } else {
+        None
+    }
 }

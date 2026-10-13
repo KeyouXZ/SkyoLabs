@@ -83,18 +83,23 @@ pub const HUMIDITY_THRESHOLD: Threshold = Threshold {
 };
 
 /// Need Calibration
+// pub const CO_THRESHOLD: Threshold = Threshold {
+//     safe: (0.0, 3500.0),
+//     warning: (3500.0, 4500.0),
+//     danger: (4500.0, f32::INFINITY),
+// };
+
+/// PPM Calibration first - According to WHO
 pub const CO_THRESHOLD: Threshold = Threshold {
-    safe: (0.0, 3500.0),
-    warning: (3500.0, 4500.0),
-    danger: (4500.0, f32::INFINITY),
+    safe: (0.0, 9.0),
+    warning: (9.0, 35.0),
+    danger: (35.0, f32::INFINITY),
 };
 
-// /// PPM Calibration first
-// pub const CO_THRESHOLD: Threshold = Threshold {
-//     safe: (0.0, 50.0),
-//     warning: (51.0, 100.0),
-//     danger: (101.0, f32::INFINITY),
-// };
+/// VCC ESP is 3.3V
+pub const VCC: f32 = 3.3;
+/// MQ-7 RL OHMS is 103 = 10K ohm
+pub const RL_OHMS: f32 = 10_000.0;
 
 pub const SSID: &str = "SkyoLabs";
 

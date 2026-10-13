@@ -57,10 +57,10 @@ fn main() -> ! {
     #[cfg(not(feature = "dummy"))]
     // Define pins
     let pins = se::core::Pins {
-        // MQ-7 Pin 4
-        mq7: peripherals.GPIO4,
-        // MQ-7 ADC 2 cuz of pin 4 is ADC-capable 2
-        mq7_adc: peripherals.ADC2,
+        // MQ-7 Pin 34
+        mq7: peripherals.GPIO34,
+        // MQ-7 ADC 1 cuz of pin 34 is ADC-capable 1
+        mq7_adc: peripherals.ADC1,
 
         // SSD1306 I2C
         ssd1306_i2c: peripherals.I2C0,

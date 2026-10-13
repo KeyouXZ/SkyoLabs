@@ -86,20 +86,11 @@ pub fn display_info<'a>(
 
     // Draw the gas
     let mut text: String<32> = String::new();
-    write!(&mut text, "Gas  : {}", gas).unwrap();
+    write!(&mut text, "Gas  : {:.1} PPM", gas).unwrap();
     Text::new(&text, Point::new(0, 45), text_style).draw(display);
 
     // Draw the gas status
     draw_glyph(display, gas_level, glyph_x, 45);
-
-    // Draw the status
-    // let mut text: String<32> = String::new();
-    // match level {
-    //     Level::Safe => write!(&mut text, "Status: AMAN").unwrap(),
-    //     Level::Warning => write!(&mut text, "Status: WASPADA").unwrap(),
-    //     Level::Danger => write!(&mut text, "Status: BAHAYA").unwrap(),
-    // };
-    // Text::new(&text, Point::new(0, 55), text_style).draw(display);
 
     let text_style = MonoTextStyleBuilder::new()
         .font(&FONT_5X8)

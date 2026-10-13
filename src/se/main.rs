@@ -6,7 +6,7 @@ use crate::{
         core::{CO_THRESHOLD, HUMIDITY_THRESHOLD, TEMPERATURE_THRESHOLD},
         display,
         shared::{SensorData, update_sensors},
-        utils,
+        utils::{self, set_delay},
     },
 };
 use core::{
@@ -18,7 +18,6 @@ use esp_hal::{
     delay::Delay,
     gpio::AnalogPin,
     i2c::master::Instance,
-    time::{Duration, Instant},
 };
 
 pub fn start<'a, ADC, MQ7, I2C>(pins: se::core::Pins<'a, ADC, MQ7, I2C>) -> !
@@ -59,31 +58,52 @@ where
         panic!("{}", e);
     }
 
+    // Calibrating
+    log::info!("Calibrating MQ-7 R0... Ensure sensor is in fresh air!");
+    let r0 = match mq7.calibrate_r0(se::core::VCC, se::core::RL_OHMS, 50) {
+        Some(calibrated_r0) => {
+            log::info!("MQ-7 Calibrated R0: {:.1} Ohms", calibrated_r0);
+            calibrated_r0
+        }
+        None => {
+            log::warn!("Calibration failed, falling back to default R0 = 10000.0");
+            10_000.0
+        }
+    };
+
     // Create Header
     let header = display::create_header();
 
     // Main Loop 500ms delay
     loop {
-        // TODO: Calibration MQ-7
-        let mq7_val = mq7.read_raw() as f32;
-
         // DHT Value
-        let (dht_temp, dht_hum) = match dht22.read(&Delay::default()) {
-            Ok(x) => x,
-            Err(e) => {
-                log::error!("{}", e);
-                // TODO: Switch to None type
-                (50.0, 50.0)
-            }
+        let Ok((dht_temp, dht_hum)) = dht22.read(&Delay::default()) else {
+            log::error!("Failed to read DHT22");
+            set_delay(500);
+
+            continue;
+        };
+
+        // Calculate Rs and CO PPM using calibrated R0
+        let Some(rs) = mq7.read_rs(se::core::VCC, se::core::RL_OHMS) else {
+            log::warn!("MQ-7 voltage out of range");
+            set_delay(500);
+            continue;
+        };
+
+        let Some(ppm) = utils::co_ppm(rs, r0) else {
+            log::warn!("Invalid MQ-7 PPM calculation");
+            set_delay(500);
+            continue;
         };
 
         let temp_level = TEMPERATURE_THRESHOLD.classify(dht_temp);
         let hum_level = HUMIDITY_THRESHOLD.classify(dht_hum);
-        let gas_level = CO_THRESHOLD.classify(mq7_val);
+        let gas_level = CO_THRESHOLD.classify(ppm);
         let level = temp_level.max(hum_level).max(gas_level);
 
         update_sensors(SensorData {
-            mq7: Some(mq7_val),
+            mq7: Some(ppm),
             temperature_c: Some(dht_temp),
             humidity_pct: Some(dht_hum),
             temp_level: Some(temp_level),
@@ -96,7 +116,7 @@ where
             "temp: {:.2} hum: {:.2} gas: {:.2} level: {:?}",
             dht_temp,
             dht_hum,
-            mq7_val,
+            ppm,
             level
         );
 
@@ -109,13 +129,12 @@ where
             header,
             dht_temp,
             dht_hum,
-            mq7_val,
+            ppm,
             temp_level,
             hum_level,
             gas_level,
         );
 
-        let delay_start = Instant::now();
-        while delay_start.elapsed() < Duration::from_millis(500) {}
+        set_delay(500);
     }
 }

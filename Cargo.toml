@@ -35,6 +35,7 @@ embedded-io-async = "0.7.0"
 
 picoserve = { version = "0.20.1", features = ["json", "embassy", "log"] }
 serde = { version = "1.0.229", features = ["derive"], default-features = false }
+libm = "0.2.16"
 
 [features]
 dummy = []
