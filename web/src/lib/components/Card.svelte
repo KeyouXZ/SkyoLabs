@@ -1,26 +1,27 @@
 <script lang="ts">
-    import { StatusLevel } from "../index";
+    import { Level } from "../index";
     import Dot from "@lucide/svelte/icons/dot";
     import type { Component } from "svelte";
 
     type Props = {
         title: string;
         icon: Component;
-        status: StatusLevel;
+        status: Level;
         value: number;
         unit: string;
         range: string;
+        progress: number;
     };
 
-    const { title, icon: Icon, status, value, unit, range }: Props = $props();
+    const { title, icon: Icon, status, value, unit, range, progress }: Props = $props();
+
+    const statusClass = $derived(
+        (status).toLowerCase(),
+    );
 </script>
 
 <div
-    class="item-card"
-    class:normal={status === StatusLevel.Normal}
-    class:warning={status === StatusLevel.Warning}
-    class:dangerous={status === StatusLevel.Dangerous}
->
+    class="item-card {statusClass}">
     <!-- HEADER -->
     <div class="item-header">
         <div class="item-header-item">
@@ -44,8 +45,10 @@
         <p class="range">{range}</p>
     </div>
 
-    <!-- TODO: Progression Bar -->
-    <!-- <div class="progress-bar"></div> -->
+    <!-- Progression Bar -->
+    <div class="progress-bar">
+        <div class="value {statusClass}" style="width: {progress}%;"></div>
+    </div>
 </div>
 
 <style>
@@ -55,7 +58,7 @@
         justify-content: center;
 
         flex-direction: column;
-        padding: 1.75rem;
+        padding: 1.5rem;
 
         /* Background blur */
         backdrop-filter: blur(12px);
@@ -115,7 +118,7 @@
     .main-item {
         display: flex;
         flex-direction: column;
-        gap: 1rem;
+        gap: 0.5rem;
     }
 
     .main-item .value {
@@ -130,23 +133,23 @@
         margin: 0;
     }
 
-    /* COLOR NORMAL */
-    .normal.item-card {
+    /* COLOR SAFE */
+    .safe.item-card {
         background: rgba(244, 241, 222, 0.95);
     }
 
-    .normal .item-header-item .icon,
-    .normal .status {
+    .safe .item-header-item .icon,
+    .safe .status {
         background: rgba(42, 157, 143, 0.072);
     }
 
-    .normal p,
-    .normal .icon,
-    .normal .main-item .value {
+    .safe p,
+    .safe .icon,
+    .safe .main-item .value {
         color: #005f73;
     }
 
-    .normal .main-item .range {
+    .safe .main-item .range {
         color: rgba(0, 95, 115, 0.7);
     }
 
@@ -190,4 +193,32 @@
     .dangerous .main-item .range {
         color: rgba(255, 255, 255, 0.8);
     }
+
+    /* PROGRESS BAR*/
+    .progress-bar {
+        width: 100%;
+        background-color: rgba(0, 95, 115, 0.471);
+        height: 0.5rem;
+        align-items: center;
+        border-radius: 0.75rem;
+    }
+
+    .progress-bar .value {
+        height: 100%;
+        border-radius: 0.75rem;
+        transition: width 0.4s ease-in-out;
+    }
+
+    .progress-bar .value.safe {
+        background-color: #005f73;
+    }
+
+    .progress-bar .value.warning {
+        background-color: #AE2012;
+    }
+
+    .progress-bar .value.dangerous {
+        background-color: grey;
+    }
+
 </style>

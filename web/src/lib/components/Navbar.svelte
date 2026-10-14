@@ -1,16 +1,17 @@
 <script lang="ts">
-    import { StatusLevel } from "../index";
     import { ZodiacAquarius } from "@lucide/svelte";
+    import Logo from "./Logo.svelte";
 
     const { status } = $props();
+
+    const statusClass = $derived(status.toLowerCase());
 </script>
 
-<nav
-    class:normal={status === StatusLevel.Normal}
-    class:warning={status === StatusLevel.Warning}
-    class:dangerous={status === StatusLevel.Dangerous}
->
-    <ZodiacAquarius />
+<nav class={statusClass}>
+    <!-- <ZodiacAquarius /> -->
+    <div class="logo">
+        <Logo size={22} />
+    </div>
     <p>SkyoLabs</p>
 </nav>
 
@@ -21,7 +22,7 @@
         display: flex;
         flex-direction: row;
         margin: 0;
-        padding: 1.5rem;
+        padding: 1rem 2rem 1rem 2rem;
         justify-content: flex-start;
         align-items: center;
         gap: 1rem;
@@ -34,11 +35,12 @@
         margin: 0;
     }
 
-    .normal p {
-        color: #005F73;
+    .safe p {
+        color: #005f73;
     }
 
-    .warning p, .dangerous p {
+    .warning p,
+    .dangerous p {
         color: white;
     }
 
@@ -47,5 +49,22 @@
         height: 1px;
         background: rgba(0, 0, 0, 0.2);
         margin: 0;
+    }
+
+    .logo {
+        padding: 0.5rem;
+        border-radius: 0.75rem;
+    }
+
+    .safe .logo {
+        background-color: #005f73;
+    }
+
+    .warning .logo {
+        background-color: #ae2012;
+    }
+
+    .dangerous .logo {
+        background-color: #800020;
     }
 </style>
